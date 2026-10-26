@@ -5,7 +5,14 @@ File-type contract. Neither is SciGuard. Neither emits a scientific-correctness
 certificate. Unsafe-acceptance vs these arms is not computed here.
 """
 
-from baselines.bids_b0 import check_b0
-from baselines.cwl_types_b1 import check_b1
+from baselines.bids_b0 import check_b0, probe_b0, probe_b0_s0, s0_tree_status
+from baselines.cwl_types_b1 import check_b1, probe_b1
 
-__all__ = ["check_b0", "check_b1"]
+__all__ = [
+    "check_b0",
+    "check_b1",
+    "probe_b0",
+    "probe_b0_s0",
+    "probe_b1",
+    "s0_tree_status",
+]

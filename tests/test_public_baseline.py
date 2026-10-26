@@ -8,7 +8,12 @@ from pathlib import Path
 import yaml
 
 from baselines.bids_b0 import check_b0
-from baselines.cwl_types_b1 import SEMANTIC_TYPES_OWNER, check_b1
+from baselines.cwl_types_b1 import (
+    SEMANTIC_TYPES_OWNER,
+    check_b1,
+    cwltool_installed,
+    nipype_installed,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
@@ -44,8 +49,16 @@ def test_b1_file_types_accept_two_niftis_on_no_transform_graph() -> None:
     """CWL/Nipype File: two NIfTIs are compatible. Not a semantic type check."""
     report = check_b1(NO_XFM)
     assert report["arm"] == "B1"
-    assert report["used_cwltool"] is False
-    assert report["used_nipype"] is False
+    if cwltool_installed():
+        assert report["baseline_mode"] == "cwltool"
+        assert report["used_cwltool"] is True
+    elif nipype_installed():
+        assert report["baseline_mode"] == "nipype"
+        assert report["used_nipype"] is True
+    else:
+        assert report["baseline_mode"] == "recorded"
+        assert report["used_cwltool"] is False
+        assert report["used_nipype"] is False
     assert report["file_types_compatible"] is True
     assert report["two_nifti_files_compatible"] is True
     assert report["accepted"] is True
@@ -82,20 +95,27 @@ def test_b0_is_not_a_strawman_rejects_illegal_bids_filename() -> None:
 
 
 def test_b0_version_pin_matched_false_when_binary_differs_from_302() -> None:
-    """If bids-validator is on PATH, record version vs shared/pins.yaml 3.0.2."""
-    from baselines.bids_b0 import pinned_bids_validator_version
+    """PATH Node 1.15.0 is not the pin. YAML graphs stay recorded."""
+    from baselines.bids_b0 import pin_status, pinned_bids_validator_version
 
     assert pinned_bids_validator_version() == "3.0.2"
     report = check_b0(NO_XFM)
+    pins = pin_status()
     assert report["recorded_pin"] == "3.0.2"
     assert report["pin_run_on_input"] is False
     assert report["bids_validator_invoked"] is False
-    if not report["bids_validator_installed"]:
+    assert report["legacy_node_1150_is_not_the_pin"] is True
+    path_ver = str(pins.get("path_bids_validator_version") or "")
+    if "1.15.0" in path_ver:
+        assert pins["path_is_pin"] is False
+    if not pins["pin_matched"]:
         assert report["pin_matched"] is False
-    elif report["bids_validator_version"] and "3.0.2" not in str(
-        report["bids_validator_version"]
-    ):
-        assert report["pin_matched"] is False
+        if not report["bids_validator_installed"]:
+            assert report["pin_matched"] is False
+        elif report["bids_validator_version"] and "3.0.2" not in str(
+            report["bids_validator_version"]
+        ):
+            assert report["pin_matched"] is False
     assert "unsafe_acceptance" not in report
     assert "unsafe_acceptance_rate" not in report
 

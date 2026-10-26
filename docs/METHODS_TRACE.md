@@ -85,6 +85,28 @@ G3 fixtures added: `fixtures/invalid/other_subject_transform.yaml` (`RULE-LINEAG
 
 ---
 
+## Wave 4 (this slice)
+
+B0 probe: if pinned `bids-validator` 3.0.2 is on PATH, invoke it on `fixtures/sidecar_tree/` (JSON sidecars only; no NIfTI). Else `baseline_mode: recorded`. A Node 1.15.0 binary is not the pin. B1 probe: if `cwltool` is importable, call File-type validation on `fixtures/cwl/file_types_probe.cwl` (no execute); else Nipype `File` if importable; else `baseline_mode: recorded`. Repair remains `--diff-only` and does not write input YAML. `certificate_of_scientific_correctness` stays false. No Z3, no LLM reviewer, no third workflow engine. Unsafe-acceptance is still not computed.
+
+---
+
+## Wave 5 (this slice)
+
+Tried to obtain BIDS Validator **3.0.2** (the pin in `shared/pins.yaml`). Node `bids-validator` 1.15.0 on PATH is **not** the pin and is never invoked. The pin was obtained as PyPI `bids-validator-deno==3.0.2` and, when that CLI is present, is invoked on `fixtures/sidecar_tree/` (JSON sidecars only; no NIfTI). YAML graphs stay `baseline_mode: recorded`. `pip install cwltool` succeeded in this environment; B1 is live File-type validation on `fixtures/cwl/file_types_probe.cwl` (no execute) when `cwltool` is importable, otherwise recorded. Repair remains `--diff-only` and does not write input YAML. `certificate_of_scientific_correctness` stays false. No Z3, no LLM reviewer. Unsafe-acceptance is still not computed.
+
+---
+
+## Wave 6 (this slice)
+
+S0 BIDS tree `shared/data/external/ds000003/` is pointed at, not copied. When the T1w is real gzip (magic `1f8b`, not a git-annex pointer) and pin 3.0.2 (`bids-validator-deno`) is available, B0 is invoked live on that tree (`sciguard b0 --s0`). Node 1.15.0 is not invoked.
+
+**Live B0 on this snapshot (26 October 2026, pin 3.0.2, schema 1.2.7).** One error: `JSON_SCHEMA_VALIDATION_ERROR` / `Funding` must be array on `dataset_description.json`. Plus recommended-key, missing README, and gzip-header warnings. `accepted` is **false**. That is the public OpenNeuro file, not a fabricated PASS.
+
+YAML graphs stay `baseline_mode: recorded`. FAIL on no-transform; UNKNOWN on omitted space. Repair remains `--diff-only`. Certificate stays false. Unsafe-acceptance is still not computed.
+
+---
+
 ## Go-gate (methods §5; not a confirmatory result)
 
 Honest BIDS Validator (filename/sidecar) and Nipype/CWL File types do not already catch the invalid family as specified: T1w labels→DWI with no transform, reversed `from`/`to`, DK used as DKT, and omitted `space` as `UNKNOWN` rather than `FAIL`. If a later honest B0/B1 configuration already rejects that family, SciGuard is a rule pack and the methods-paper gate fails.

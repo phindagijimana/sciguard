@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from baselines.bids_b0 import probe_b0, probe_b0_s0
 from validation.check import check_workflow, suggest_repair
 
 
@@ -39,6 +40,24 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="optional path for the diff (use reports/; never the input YAML)",
+    )
+    b0 = sub.add_parser(
+        "b0",
+        help="B0 BIDS Validator probe (layout/sidecar; not SciGuard edges)",
+    )
+    b0.add_argument(
+        "--s0",
+        action="store_true",
+        help=(
+            "point at shared/data/external/ds000003 if a real gzip T1w is "
+            "present (never copy NIfTI)"
+        ),
+    )
+    b0.add_argument(
+        "--report",
+        type=Path,
+        default=None,
+        help="optional JSON report path",
     )
     return parser
 
@@ -105,6 +124,18 @@ def repair_command(
     return 0
 
 
+def b0_command(*, s0: bool, report: Path | None) -> int:
+    """Print the B0 probe. Never a scientific-correctness certificate."""
+    result = probe_b0_s0() if s0 else probe_b0()
+    result["certificate_of_scientific_correctness"] = False
+    text = json.dumps(result, indent=2, sort_keys=False)
+    print(text)
+    if report is not None:
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(text + "\n", encoding="utf-8")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -112,6 +143,8 @@ def main(argv: list[str] | None = None) -> int:
         return validate_command(args.workflow, args.report)
     if args.command == "repair":
         return repair_command(args.workflow, args.diff_only, args.report)
+    if args.command == "b0":
+        return b0_command(s0=args.s0, report=args.report)
     parser.error(f"unknown command {args.command}")
     return 2
 

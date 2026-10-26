@@ -1,0 +1,6 @@
+{
+  "Name": "SciGuard B0 sidecar probe",
+  "BIDSVersion": "1.8.0",
+  "DatasetType": "raw",
+  "License": "CC0"
+}

@@ -1,0 +1,25 @@
+# Copy into each public repo as .github/workflows/pytest.yml
+# No model API keys. Fail if a NIfTI is in the tree.
+name: pytest
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]" || pip install -e ".[test]" || pip install -e .
+      - run: pip install pytest PyYAML jsonschema
+      - name: no NIfTI in git
+        run: |
+          if git ls-files | grep -Ei '\.(nii|nii\.gz)$'; then
+            echo "NIfTI must not be in git" >&2
+            exit 1
+          fi
+      - run: python -m pytest tests -q

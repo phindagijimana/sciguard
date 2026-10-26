@@ -10,8 +10,11 @@ Kepler OWL (Ratcliffe, Squire, Kearney, 2010), and APE/EDAM (Kasalica &
 Lamprecht, 2020). Per-step file-size / RAM / timeout constraints belong to
 Schintke et al., FGCS 2024. This residual is File-class compatibility only.
 
-``cwltool`` and ``nipype`` are not required. This implements the recorded
-File-type contract. Do not claim those packages were imported.
+If ``cwltool`` is importable, call its File-type check on a File+File
+CommandLineTool (no execute). Else if ``nipype`` is importable, call the
+Nipype ``File`` trait. Otherwise keep the recorded File-type contract and
+``baseline_mode: recorded``. Do not claim those packages were imported
+unless the used_* flag is true.
 
 SciGuard τ (and SciCap node annotations) bind ``space`` / ``atlas`` /
 ``value_type`` on top of this File class. That is G2, not B1.
@@ -25,6 +28,9 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
+_HERE = Path(__file__).resolve().parents[1]
+FILE_PROBE_CWL = _HERE / "fixtures" / "cwl" / "file_types_probe.cwl"
 
 # Residual vs SciGuard (G2): File is File. Transform-effect T is not a CWL type.
 SEMANTIC_TYPES_OWNER = (
@@ -90,6 +96,70 @@ def _compatible(left: dict[str, str], right: dict[str, str]) -> bool:
     return left["class"] == "File"
 
 
+def _call_cwltool_file_check() -> dict[str, Any] | None:
+    """Call installed cwltool File-type validation. None if not importable.
+
+    Loads the File+File probe CWL. Does not execute a command or add an engine.
+    """
+    if not cwltool_installed():
+        return None
+    extra: dict[str, Any] = {
+        "baseline_mode": "cwltool",
+        "used_cwltool": True,
+        "cwltool_installed": True,
+        "contract": "cwltool-file-type",
+    }
+    try:
+        from cwltool.context import LoadingContext
+        from cwltool.load_tool import (
+            fetch_document,
+            resolve_and_validate_document,
+        )
+
+        loading = LoadingContext()
+        try:
+            loading, _workflowobj, uri = fetch_document(str(FILE_PROBE_CWL), loading)
+        except TypeError:
+            loading, _workflowobj, uri = fetch_document(
+                str(FILE_PROBE_CWL), loadingContext=loading
+            )
+        try:
+            loading, uri = resolve_and_validate_document(loading, _workflowobj, uri)
+        except TypeError:
+            loading, uri = resolve_and_validate_document(
+                loading, _workflowobj, uri=uri
+            )
+        extra["cwltool_call"] = "cwltool.load_tool.resolve_and_validate_document"
+        extra["cwltool_file_tool"] = str(FILE_PROBE_CWL)
+        extra["cwltool_uri"] = str(uri)
+    except Exception as exc:  # recorded-or-real: keep File-class result
+        extra["cwltool_error"] = str(exc)
+        extra["cwltool_call"] = "failed"
+    return extra
+
+
+def _call_nipype_file_check() -> dict[str, Any] | None:
+    """Call installed Nipype File trait. None if not importable."""
+    if not nipype_installed():
+        return None
+    extra: dict[str, Any] = {
+        "baseline_mode": "nipype",
+        "used_nipype": True,
+        "nipype_installed": True,
+        "contract": "nipype-file-trait",
+    }
+    try:
+        from nipype.interfaces.base import File as NipypeFile
+
+        trait = NipypeFile(exists=False)
+        extra["nipype_call"] = "nipype.interfaces.base.File"
+        extra["nipype_file_trait"] = type(trait).__name__
+    except Exception as exc:
+        extra["nipype_error"] = str(exc)
+        extra["nipype_call"] = "failed"
+    return extra
+
+
 def _artifacts(document: dict[str, Any]) -> list[dict[str, Any]]:
     found: list[dict[str, Any]] = []
     for edge in document.get("edges") or []:
@@ -134,7 +204,7 @@ def check_b1(source: Path | str | dict[str, Any]) -> dict[str, Any]:
         _compatible(nifti_files[0], other) for other in nifti_files[1:]
     )
 
-    return {
+    result = {
         "arm": "B1",
         "tool": "cwl_nipype_file_types",
         "contract": "cwl_salad_file_and_nipype_file",
@@ -142,6 +212,7 @@ def check_b1(source: Path | str | dict[str, Any]) -> dict[str, Any]:
         "nipype_installed": nipype_installed(),
         "used_cwltool": False,
         "used_nipype": False,
+        "baseline_mode": "recorded",
         "file_types_compatible": compatible,
         "two_nifti_files_compatible": two_niftis_ok or (
             compatible and len(nifti_files) >= 2
@@ -155,9 +226,40 @@ def check_b1(source: Path | str | dict[str, Any]) -> dict[str, Any]:
         "checks_transform_direction": False,
         "emits_unknown_class": False,
         "source": str(path) if path is not None else None,
+        "certificate_of_scientific_correctness": False,
         "note": (
             "Two NIfTI Files are compatible. CWL/Nipype File types do not "
             "check space, atlas, or transform direction. Semantic types are "
             "owned by WINGS/Kepler/APE; this residual is File class only."
         ),
     }
+    live = _call_cwltool_file_check()
+    if live is None:
+        live = _call_nipype_file_check()
+    if live:
+        result.update(live)
+        if result.get("used_cwltool"):
+            result["note"] = (
+                "Called cwltool File-type check on a File+File CWL tool "
+                "(no execute). File still does not check space, atlas, or "
+                "transform direction."
+            )
+        elif result.get("used_nipype"):
+            result["note"] = (
+                "Called Nipype File trait (exists=False). File still does "
+                "not check space, atlas, or transform direction."
+            )
+    result["certificate_of_scientific_correctness"] = False
+    return result
+
+
+def probe_b1(source: Path | str | dict[str, Any] | None = None) -> dict[str, Any]:
+    """B1 probe: cwltool File-type check if importable, else Nipype, else recorded."""
+    if source is None:
+        source = {
+            "edges": [
+                {"artifact": {"kind": "parcellation"}},
+                {"artifact": {"kind": "diffusion_reference"}},
+            ]
+        }
+    return check_b1(source)
