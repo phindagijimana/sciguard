@@ -1,37 +1,22 @@
 # SciGuard
 
-Read-only preflight for workflow **edges**. Status is **PASS**, **FAIL**, **UNKNOWN**, or **NEEDS_REVIEW**. Omitted `space` is UNKNOWN, not FAIL. This is not a scientific-correctness certificate.
+`sciguard validate` returns **PASS**, **FAIL**, **UNKNOWN**, or **NEEDS_REVIEW** on workflow edges. Omitted `space` is UNKNOWN, not FAIL.
 
-Not a workflow engine. BIDS Validator and CWL File types are the public baseline.
+Not a workflow engine or a correctness certificate.
 
-## Install
-
-```bash
-pip install -e .
-```
-
-Python 3.11+. No model API.
-
-## Use
+## Go
 
 ```bash
+git clone https://github.com/phindagijimana/sciguard.git
+cd sciguard && pip install -e .
 sciguard validate fixtures/invalid/labels_t1w_to_dwi_no_transform.yaml
 sciguard validate fixtures/unknown/space_omitted.yaml
-sciguard repair --diff-only fixtures/invalid/linear_on_labels.yaml
 ```
 
-Repair prints a diff. It never writes the input YAML.
-
-## Tests
+Python 3.11+. No model API. `sciguard repair --diff-only` prints a diff; it does not write the input YAML.
 
 ```bash
 pytest tests
 ```
 
-## Docs
-
-- [Methods](docs/SciGuard_Methods.md) (G1–G5)
-- [Literature map](docs/SciGuard_Literature_Map.md)
-- [Methods trace](docs/METHODS_TRACE.md)
-
-Apache-2.0.
+[Methods](docs/SciGuard_Methods.md) · Apache-2.0
