@@ -7,13 +7,18 @@ Not a workflow engine or a correctness certificate.
 ## Go
 
 ```bash
-git clone https://github.com/phindagijimana/sciguard.git
-cd sciguard && pip install -e .
+pip install git+https://github.com/phindagijimana/sciguard.git
 sciguard validate fixtures/invalid/labels_t1w_to_dwi_no_transform.yaml
-sciguard validate fixtures/unknown/space_omitted.yaml
+```
+
+```python
+from sciguard import validate
+validate("workflow.yaml")
 ```
 
 Python 3.11+. No model API. `sciguard repair --diff-only` prints a diff; it does not write the input YAML.
+
+Optional agent transport (same `validate`): `python -m sciguard.mcp`
 
 ```bash
 pytest tests

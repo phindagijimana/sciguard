@@ -20,7 +20,7 @@ dev = ["pytest>=8"]
 sciguard = "validation.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["validation*", "baselines*"]
+include = ["validation*", "baselines*", "sciguard*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
