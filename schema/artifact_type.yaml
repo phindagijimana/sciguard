@@ -1,0 +1,19 @@
+# SciGuard G2 dependent artifact type. Bind to BIDS/NIDM terms. Do not infer missing fields.
+schema_version: 0.1
+artifact_type:
+  kind: parcellation | diffusion_reference | spatial_transform | tractogram | connectome | other
+  modality: T1w | dwi | unknown
+  space: BIDS space- / tpl- or NIDM coordinate space
+  atlas: DesikanKilliany | DesikanKillianyTourville | other | unknown
+  value_type: discrete_labels | continuous | unknown
+  units: string | unknown
+  transform_ancestry:
+    from_space: string | unknown
+    to_space: string | unknown
+    same_subject: true | false | unknown
+    verified: true | false | unknown
+  qc: passed | failed | unknown
+operation_effect:
+  may_rewrite: [space]
+  must_preserve: [atlas, value_type]
+  interpolation_if_discrete_labels: nearest_neighbor

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sciguard.local/schema/workflow.schema.json",
+  "title": "SciGuard workflow document v0",
+  "description": "Declared DAG with artifact type τ on edges. Absent fields stay absent (unknown). Not a CWL or Nipype document.",
+  "type": "object",
+  "required": ["workflow_id", "operations", "edges"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "workflow_id": { "type": "string", "minLength": 1 },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "artifact": { "$ref": "#/$defs/artifact" }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "contract": { "type": "string" },
+          "interpolation": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "artifact": { "$ref": "#/$defs/artifact" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "kind": { "type": "string" },
+        "modality": { "type": "string" },
+        "space": { "type": "string" },
+        "atlas": { "type": "string" },
+        "atlas_identity": { "type": "string" },
+        "label_table": { "type": "string" },
+        "value_type": { "type": "string" },
+        "units": { "type": "string" },
+        "interpolation": { "type": "string" },
+        "subject": { "type": "string" },
+        "from_space": { "type": "string" },
+        "to_space": { "type": "string" },
+        "same_subject": { "type": ["boolean", "string"] },
+        "verified": { "type": ["boolean", "string"] },
+        "qc": { "type": "string" },
+        "transform_ancestry": { "type": "object" }
+      }
+    }
+  }
+}

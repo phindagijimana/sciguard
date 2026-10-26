@@ -1,0 +1,10 @@
+# Label-preserving interpolation. discrete_labels + linear/continuous → FAIL (G2 ablation).
+# discrete_labels with interpolation omitted → UNKNOWN (do not infer nearest-neighbor).
+id: RULE-INTERP
+family: interpolation
+predicate: value_type != discrete_labels OR interpolation == nearest_neighbor
+action: reject_continuous_resample_of_labels
+status_if_missing_evidence: UNKNOWN
+documentation_sources:
+  - ANTs / ITK GenericLabel vs linear
+  - map_labels_to_diffusion contract (nearest_neighbor if discrete)

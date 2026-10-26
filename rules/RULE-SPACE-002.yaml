@@ -1,0 +1,10 @@
+# Illustrative SciGuard rule (G1, G2). Citation and exact predicate must be verified before use.
+# Missing transform evidence → UNKNOWN (not FAIL). Direct space mismatch → FAIL.
+id: RULE-SPACE-002
+family: spatial
+predicate: atlas.space == streamline.reference_space OR validated_transform_chain
+action: reject_direct_mismatch_inspect_transform_evidence
+status_if_missing_evidence: UNKNOWN
+documentation_sources:
+  - BIDS derivatives spatial references
+  - MRtrix3 label-to-streamline mapping

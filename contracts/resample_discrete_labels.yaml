@@ -1,0 +1,26 @@
+# Second SciGuard operation contract (Paper 2 methods G2).
+# Not an official ANTs/ITK/FreeSurfer/CWL schema.
+# Effect T: preserve atlas and discrete labels; nearest-neighbor required.
+# Linear/continuous interpolation on discrete_labels → FAIL (RULE-INTERP).
+schema_version: 0.1
+operation: resample_discrete_labels
+inputs:
+  labels:
+    kind: parcellation
+    value_type: discrete_labels
+    interpolation: nearest_neighbor
+  reference:
+    kind: anatomical_reference
+preconditions:
+  - label_preserving_interpolation
+  - nearest_neighbor_if_discrete_labels
+  - subject_identity_consistent
+outputs:
+  labels_resampled:
+    kind: parcellation
+    value_type: discrete_labels
+effect:
+  may_rewrite: [space]
+  must_preserve: [atlas, value_type]
+  interpolation_if_discrete_labels: nearest_neighbor
+validation_policy: reject_on_known_mismatch

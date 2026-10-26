@@ -1,0 +1,10 @@
+# Subject lineage. Transform or reference from another subject → FAIL (G2).
+# same_subject omitted and subject ids not both declared → UNKNOWN.
+id: RULE-LINEAGE
+family: lineage
+predicate: same_subject is true OR declared subject ids on labels, reference, and transform match
+action: reject_cross_subject_transform
+status_if_missing_evidence: UNKNOWN
+documentation_sources:
+  - BIDS sub- entity
+  - map_labels_to_diffusion precondition subject_identity_consistent

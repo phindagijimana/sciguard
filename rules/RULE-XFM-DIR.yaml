@@ -1,0 +1,10 @@
+# Transform direction. from/to reversed → FAIL (G2 ablation).
+# Missing from_space/to_space → UNKNOWN. No transform on the path → rule did not run.
+id: RULE-XFM-DIR
+family: transform_direction
+predicate: transform.from_space == labels.space AND transform.to_space == reference.space
+action: reject_reversed_or_contradictory_direction
+status_if_missing_evidence: UNKNOWN
+documentation_sources:
+  - BIDS derivatives transform entities (from- / to-)
+  - MRtrix3 / ANTs warp direction conventions

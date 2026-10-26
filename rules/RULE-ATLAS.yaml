@@ -1,0 +1,11 @@
+# Atlas identity. DK used as DKT (or the reverse) → FAIL (G2).
+# One declared atlas with no conflicting identity evidence → rule did not run.
+# Never infer atlas from filename or voxel dtype.
+id: RULE-ATLAS
+family: atlas
+predicate: declared atlas family equals label-table / atlas_identity family when both are known
+action: reject_dk_dkt_identity_mismatch
+status_if_missing_evidence: UNKNOWN
+documentation_sources:
+  - BIDS atlas- entity
+  - FreeSurfer Desikan-Killiany vs Desikan-Killiany-Tourville

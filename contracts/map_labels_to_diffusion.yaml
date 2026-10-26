@@ -1,0 +1,32 @@
+# Illustrative SciGuard operation contract (Paper 2 methods G1, G2, G5).
+# Not an official BIDS/FreeSurfer/MRtrix/CWL schema.
+# Effect T: rewrite space T1w→DWI; preserve atlas and discrete labels; require
+# same-subject, correctly oriented transform. Missing transform evidence → UNKNOWN.
+schema_version: 0.1
+operation: map_labels_to_diffusion
+inputs:
+  labels:
+    kind: parcellation
+    atlas: DesikanKilliany
+    space: subject_T1w
+    value_type: discrete_labels
+  reference:
+    kind: diffusion_reference
+    space: subject_DWI
+  transform:
+    kind: spatial_transform
+    from_space: subject_T1w
+    to_space: subject_DWI
+    same_subject: true
+    verified: true
+preconditions:
+  - subject_identity_consistent
+  - transform_direction_valid
+  - label_preserving_interpolation
+outputs:
+  labels_dwi:
+    kind: parcellation
+    atlas: DesikanKilliany
+    space: subject_DWI
+    value_type: discrete_labels
+validation_policy: reject_on_known_mismatch

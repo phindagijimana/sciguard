@@ -1,0 +1,26 @@
+# Gold: T1w labels wired to DWI, no transform → FAIL RULE-SPACE-002.
+schema_version: "0.1"
+workflow_id: demo-001
+operations:
+  - id: map1
+    contract: map_labels_to_diffusion
+    interpolation: nearest_neighbor
+edges:
+  - id: labels→map1
+    from: labels
+    to: map1.labels
+    artifact:
+      kind: parcellation
+      modality: T1w
+      space: subject_T1w
+      atlas: DesikanKilliany
+      value_type: discrete_labels
+      subject: sub-01
+  - id: ref→map1
+    from: tractogram
+    to: map1.reference
+    artifact:
+      kind: diffusion_reference
+      modality: dwi
+      space: subject_DWI
+      subject: sub-01

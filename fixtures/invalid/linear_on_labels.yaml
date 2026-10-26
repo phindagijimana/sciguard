@@ -1,0 +1,29 @@
+# Gold: discrete labels + linear interpolation → FAIL RULE-INTERP.
+# Same-space resample so the FAIL is interpolation, not space.
+# Uses the second contract (resample_discrete_labels; nearest-neighbor required).
+schema_version: "0.1"
+workflow_id: demo-linear-on-labels
+operations:
+  - id: resample1
+    contract: resample_discrete_labels
+    interpolation: linear
+edges:
+  - id: labels→resample1
+    from: labels
+    to: resample1.labels
+    artifact:
+      kind: parcellation
+      modality: T1w
+      space: subject_T1w
+      atlas: DesikanKilliany
+      value_type: discrete_labels
+      interpolation: linear
+      subject: sub-01
+  - id: ref→resample1
+    from: t1w_grid
+    to: resample1.reference
+    artifact:
+      kind: anatomical_reference
+      modality: T1w
+      space: subject_T1w
+      subject: sub-01

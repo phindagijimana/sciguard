@@ -1,0 +1,37 @@
+# Gold: transform from another subject → FAIL RULE-LINEAGE.
+# Spaces and from/to are documented so the FAIL is lineage, not space.
+schema_version: "0.1"
+workflow_id: demo-other-subject
+operations:
+  - id: map1
+    contract: map_labels_to_diffusion
+    interpolation: nearest_neighbor
+edges:
+  - id: labels→map1
+    from: labels
+    to: map1.labels
+    artifact:
+      kind: parcellation
+      modality: T1w
+      space: subject_T1w
+      atlas: DesikanKillianyTourville
+      value_type: discrete_labels
+      subject: sub-01
+  - id: ref→map1
+    from: tractogram
+    to: map1.reference
+    artifact:
+      kind: diffusion_reference
+      modality: dwi
+      space: subject_DWI
+      subject: sub-01
+  - id: xfm→map1
+    from: transform
+    to: map1.transform
+    artifact:
+      kind: spatial_transform
+      from_space: subject_T1w
+      to_space: subject_DWI
+      same_subject: false
+      verified: true
+      subject: sub-02

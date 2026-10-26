@@ -1,0 +1,19 @@
+# SciGuard G1 status vocabulary. Missing evidence is never PASS or FAIL.
+schema_version: 0.1
+edge_or_rule_status:
+  PASS:
+    meaning: required predicates established
+    auto_accept: eligible
+  FAIL:
+    meaning: contradiction demonstrated
+    auto_accept: false
+  UNKNOWN:
+    meaning: evidence missing; not a scientific verdict
+    auto_accept: false
+  NEEDS_REVIEW:
+    meaning: policy requires a human; not a scientific verdict
+    auto_accept: false
+graph_policy:
+  any_FAIL: reject
+  only_PASS_and_UNKNOWN: not_valid_not_auto_accepted
+  certificate_of_scientific_correctness: never
