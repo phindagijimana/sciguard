@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import copy
 import difflib
+import os
 from pathlib import Path
 from typing import Any
 
@@ -15,9 +16,26 @@ import jsonschema
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / "schema" / "workflow.schema.json"
-CONTRACTS_DIR = ROOT / "contracts"
-RULES_DIR = ROOT / "rules"
+
+
+def _data_root() -> Path:
+    """Source checkout, or the ``sciguard_data`` package a pip install ships."""
+    override = os.environ.get("SCIGUARD_DATA")
+    if override:
+        return Path(override)
+    if (ROOT / "schema" / "workflow.schema.json").is_file():
+        return ROOT
+    try:
+        import sciguard_data
+    except ImportError:
+        return ROOT
+    return Path(sciguard_data.__file__).resolve().parent
+
+
+DATA_ROOT = _data_root()
+SCHEMA_PATH = DATA_ROOT / "schema" / "workflow.schema.json"
+CONTRACTS_DIR = DATA_ROOT / "contracts"
+RULES_DIR = DATA_ROOT / "rules"
 
 MISSING = "unknown"  # declared-field sentinel (never infer)
 PASS = "PASS"

@@ -19,8 +19,26 @@ dev = ["pytest>=8"]
 [project.scripts]
 sciguard = "validation.cli:main"
 
-[tool.setuptools.packages.find]
-include = ["validation*", "baselines*", "sciguard*"]
+[tool.setuptools]
+packages = [
+  "validation",
+  "baselines",
+  "sciguard",
+  "sciguard_data",
+  "sciguard_data.schema",
+  "sciguard_data.contracts",
+  "sciguard_data.rules",
+]
+
+[tool.setuptools.package-dir]
+"sciguard_data.schema" = "schema"
+"sciguard_data.contracts" = "contracts"
+"sciguard_data.rules" = "rules"
+
+[tool.setuptools.package-data]
+"sciguard_data.schema" = ["*.json", "*.yaml"]
+"sciguard_data.contracts" = ["*.yaml"]
+"sciguard_data.rules" = ["*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
